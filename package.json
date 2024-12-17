@@ -1,0 +1,17 @@
+{
+  "name": "discord_bot",
+  "version": "1.0.0",
+  "description": "discord bot written in js",
+  "main": "index.js",
+  "scripts": {
+    "main": "node index.js",
+    "commands": "node deploy-commands.js",
+    "clear": "node clear-commands.js"
+  },
+  "author": "tomi vartiainen",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^14.16.3",
+    "dotenv": "^16.4.7"
+  }
+}
