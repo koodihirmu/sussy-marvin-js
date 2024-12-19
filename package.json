@@ -13,6 +13,11 @@
   "dependencies": {
     "discord.js": "^14.16.3",
     "dotenv": "^16.4.7",
+    "inkscape": "^3.1.1",
     "node-latex": "^3.1.0"
+  },
+  "devDependencies": {
+    "pdf-to-png-converter": "^3.6.3",
+    "pdftopic": "^1.0.7-alpha"
   }
 }
