@@ -12,7 +12,8 @@ const latexGenerateDocument = async (input) => {
 	\\pagenumbering{gobble}
 	\\begin{document} 
 	\\begin{math}
-	${input} 
+	\\displaystyle
+	${input}
 	\\end{math}
 	\\end{document} % This is the end of the document
 	`;
@@ -55,16 +56,17 @@ module.exports = {
 			// write latex to pdf
 			await pdf.pipe(output)
 
-
-			pdf.on('error', err => interaction.reply({ content: "was not able to generate latex for your input.", flags: MessageFlags.Ephemeral }));
-			pdf.on('finish', async () => {
+			await pdf.on('error', err => interaction.reply({ content: "was not able to generate latex for your input.", flags: MessageFlags.Ephemeral }));
+			await pdf.on('finish', async () => {
 				// create png from pdf
 				const pdfIn = fs.readFileSync(`tmp/${outputName}.pdf`)
 				const convertedResult = await pdftopic.pdftobuffer(pdfIn, 0);
 				fs.writeFileSync(`tmp/${outputName}.png`, convertedResult[0]);
 				await interaction.reply({ files: [{ attachment: `tmp/${outputName}.png` }] })
 			});
+
 		} catch (error) {
+			console.error(error)
 			interaction.reply({ content: "was not able to generate latex for your input.", flags: MessageFlags.Ephemeral })
 		}
 	},
