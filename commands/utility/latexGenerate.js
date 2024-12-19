@@ -42,13 +42,13 @@ module.exports = {
 		}
 
 		try {
-			fs.writeFile('latex-templates/input.tex', await latexGenerateDocument(input), err => {
+			fs.writeFile(`latex-templates/${interaction.user.id}.tex`, await latexGenerateDocument(input), err => {
 				if (err) {
 					console.error(err)
 				}
 			});
 
-			const latex_input = fs.createReadStream('latex-templates/input.tex')
+			const latex_input = fs.createReadStream(`latex-templates/${interaction.user.id}.tex`)
 			const output = fs.createWriteStream(`tmp/${outputName}.pdf`)
 			const pdf = latex(latex_input)
 
