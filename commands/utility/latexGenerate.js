@@ -18,11 +18,6 @@ const latexGenerateDocument = async (input) => {
 	`;
 }
 
-const createPdf = async () => {
-	const pdfIn = fs.readFileSync('tmp/output.pdf')
-	const convertedResult = await pdftopic.pdftobuffer(pdfIn, 0);
-	fs.writeFileSync('tmp/output.png', convertedResult[0]);
-}
 
 module.exports = {
 	// creating the slash command
@@ -37,31 +32,41 @@ module.exports = {
 		.setDefaultMemberPermissions(PermissionFlagsBits.ViewChannel),
 	// function to execute the interaction
 	async execute(interaction) {
+		// prefix for outputfiles
+		const outputName = `${interaction.user.id}-output`;
+		// user input
 		const input = interaction.options.getString('input') ?? undefined;
 		if (!input) {
 			interaction.reply({ content: "no input provided", flags: MessageFlags.Ephemeral })
 			return;
 		}
 
-		fs.writeFile('latex-templates/input.tex', await latexGenerateDocument(input), err => {
-			if (err) {
-				console.error(err)
-			}
-		});
+		try {
+			fs.writeFile('latex-templates/input.tex', await latexGenerateDocument(input), err => {
+				if (err) {
+					console.error(err)
+				}
+			});
 
-		const latex_input = fs.createReadStream('latex-templates/input.tex')
-		const output = fs.createWriteStream('tmp/output.pdf')
-		const pdf = latex(latex_input)
+			const latex_input = fs.createReadStream('latex-templates/input.tex')
+			const output = fs.createWriteStream(`tmp/${outputName}.pdf`)
+			const pdf = latex(latex_input)
 
-		//await interaction.reply({ content: `latex input ${input}`, flags: MessageFlags.Ephemeral });
-		await pdf.pipe(output)
+			// write latex to pdf
+			await pdf.pipe(output)
 
 
-		pdf.on('error', err => interaction.reply({ content: "was not able to generate latex for your input.", flags: MessageFlags.Ephemeral }));
-		pdf.on('finish', async () => {
-			await createPdf()
-			await interaction.reply({ files: [{ attachment: 'tmp/output.png' }] })
-		});
+			pdf.on('error', err => interaction.reply({ content: "was not able to generate latex for your input.", flags: MessageFlags.Ephemeral }));
+			pdf.on('finish', async () => {
+				// create png from pdf
+				const pdfIn = fs.readFileSync(`tmp/${outputName}.pdf`)
+				const convertedResult = await pdftopic.pdftobuffer(pdfIn, 0);
+				fs.writeFileSync(`tmp/${outputName}.png`, convertedResult[0]);
+				await interaction.reply({ files: [{ attachment: `tmp/${outputName}.png` }] })
+			});
+		} catch (error) {
+			interaction.reply({ content: "was not able to generate latex for your input.", flags: MessageFlags.Ephemeral })
+		}
 	},
 	global: true // not used
 };
