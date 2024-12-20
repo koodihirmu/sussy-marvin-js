@@ -63,6 +63,9 @@ module.exports = {
 				const convertedResult = await pdftopic.pdftobuffer(pdfIn, 0);
 				fs.writeFileSync(`tmp/${outputName}.png`, convertedResult[0]);
 				await interaction.reply({ files: [{ attachment: `tmp/${outputName}.png` }] })
+				// close streams
+				latex_input.close()
+				output.close()
 			});
 
 		} catch (error) {
