@@ -34,6 +34,7 @@ module.exports = {
 	// function to execute the interaction
 	async execute(interaction) {
 		// prefix for outputfiles
+		const tmp_path = "tmp/"
 		const outputName = `${interaction.user.id}-output`;
 		// user input
 		const input = interaction.options.getString('input') ?? undefined;
@@ -50,19 +51,24 @@ module.exports = {
 			});
 
 			const latex_input = fs.createReadStream(`latex-templates/${interaction.user.id}.tex`)
-			const output = fs.createWriteStream(`tmp/${outputName}.pdf`)
+			const output = fs.createWriteStream(`${tmp_path}${outputName}.pdf`)
 			const pdf = latex(latex_input)
+			console.log("pdf from latex input")
 
 			// write latex to pdf
 			await pdf.pipe(output)
+			console.log("piped the pdf to output")
 
-			await pdf.on('error', err => interaction.reply({ content: "was not able to generate latex for your input.", flags: MessageFlags.Ephemeral }));
+			await pdf.on('error', err => interaction.reply({ content: err.message, flags: MessageFlags.Ephemeral }));
 			await pdf.on('finish', async () => {
 				// create png from pdf
-				const pdfIn = fs.readFileSync(`tmp/${outputName}.pdf`)
+				const pdfIn = fs.readFileSync(`${tmp_path}${outputName}.pdf`)
+				console.log("reading in pdf")
 				const convertedResult = await pdftopic.pdftobuffer(pdfIn, 0);
-				fs.writeFileSync(`tmp/${outputName}.png`, convertedResult[0]);
-				await interaction.reply({ files: [{ attachment: `tmp/${outputName}.png` }] })
+				console.log("converting with pdftopic")
+				fs.writeFileSync(`${tmp_path}${outputName}.png`, convertedResult[0]);
+				console.log("writing")
+				await interaction.reply({ files: [{ attachment: `${tmp_path}${outputName}.png` }] })
 				// close streams
 				latex_input.close()
 				output.close()
@@ -70,7 +76,7 @@ module.exports = {
 
 		} catch (error) {
 			console.error(error)
-			interaction.reply({ content: "was not able to generate latex for your input.", flags: MessageFlags.Ephemeral })
+			interaction.reply({ content: `${error}`, flags: MessageFlags.Ephemeral })
 		}
 	},
 	global: true // not used
