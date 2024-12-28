@@ -61,17 +61,24 @@ module.exports = {
 
 			await pdf.on('error', err => interaction.reply({ content: err.message, flags: MessageFlags.Ephemeral }));
 			await pdf.on('finish', async () => {
-				// create png from pdf
-				const pdfIn = fs.readFileSync(`${tmp_path}${outputName}.pdf`)
-				console.log("reading in pdf")
-				const convertedResult = await pdftopic.pdftobuffer(pdfIn, 0);
-				console.log("converting with pdftopic")
-				fs.writeFileSync(`${tmp_path}${outputName}.png`, convertedResult[0]);
-				console.log("writing")
-				await interaction.reply({ files: [{ attachment: `${tmp_path}${outputName}.png` }] })
-				// close streams
-				latex_input.close()
-				output.close()
+				try {
+					// create png from pdf
+					const pdfIn = fs.readFileSync(`${tmp_path}${outputName}.pdf`)
+					console.log("reading in pdf")
+					const convertedResult = await pdftopic.pdftobuffer(pdfIn, 0);
+					console.log("converting with pdftopic")
+					fs.writeFileSync(`${tmp_path}${outputName}.png`, convertedResult[0]);
+					console.log("writing")
+					await interaction.reply({ files: [{ attachment: `${tmp_path}${outputName}.png` }] })
+					// close streams
+					latex_input.close()
+					output.close()
+				}
+				catch (error) {
+					console.log(error.message)
+					latex_input.close()
+					output.close()
+				}
 			});
 
 		} catch (error) {
