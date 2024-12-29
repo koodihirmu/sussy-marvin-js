@@ -34,8 +34,19 @@ module.exports = {
 	// function to execute the interaction
 	async execute(interaction) {
 		// prefix for outputfiles
-		const tmp_path = "tmp/"
+		const tmp_path = "./tmp/"
+		const latexTemplatePath = "./latex-templates/"
 		const outputName = `${interaction.user.id}-output`;
+
+		// create directories for tmp and latex templates
+		fs.mkdir(tmp_path, { recursive: true }, (err) => {
+			if (err) { throw (err) }
+		})
+
+		fs.mkdir(latexTemplatePath, { recursive: true }, (err) => {
+			if (err) { throw (err) }
+		})
+
 		// user input
 		const input = interaction.options.getString('input') ?? undefined;
 		if (!input) {
