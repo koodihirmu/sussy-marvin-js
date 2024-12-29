@@ -19,6 +19,15 @@ const latexGenerateDocument = async (input) => {
 	`;
 }
 
+// sanitize input for discord reply
+const sanitizeString = (inputString) => {
+	inputString = inputString.replaceAll("_", "\\_");
+	inputString = inputString.replaceAll("|", "\\|");
+	inputString = inputString.replaceAll("~", "\\~");
+	inputString = inputString.replaceAll("`", "\\`");
+	inputString = inputString.replaceAll("\*", "\\*");
+	return inputString;
+}
 
 module.exports = {
 	// creating the slash command
@@ -80,7 +89,7 @@ module.exports = {
 					console.log("converting with pdftopic")
 					fs.writeFileSync(`${tmp_path}${outputName}.png`, convertedResult[0]);
 					console.log("writing")
-					await interaction.reply({ files: [{ attachment: `${tmp_path}${outputName}.png` }] })
+					await interaction.reply({ content: `||${sanitizeString(input)}||`, files: [{ attachment: `${tmp_path}${outputName}.png` }] })
 					// close streams
 					latex_input.close()
 					output.close()
